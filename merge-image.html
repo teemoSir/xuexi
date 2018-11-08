@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>js+canvas多张图片合成一张图片代码</title>
+
+</head>
+<body>
+<div id="imgBox">
+
+</div>
+<script>
+    var config = {
+        position: [[0, 0], [512, 0], [0, 512], [512, 512]],
+        data: [
+            'http://mt3.google.cn/vt/lyrs=y@142&hl=zh-CN&gl=cn&x=27&y=10&z=5&s=Galil',
+            'http://mt3.google.cn/vt/lyrs=y@142&hl=zh-CN&gl=cn&x=27&y=13&z=5&s=Galil',
+            'http://mt3.google.cn/vt/lyrs=y@142&hl=zh-CN&gl=cn&x=27&y=11&z=5&s=Galil',
+            'http://mt3.google.cn/vt/lyrs=y@142&hl=zh-CN&gl=cn&x=51&y=24&z=6&s=Galil'],
+        msg: document.getElementById('imgBox'),
+        base64: [],
+        canvasWidth: 1024,
+        canvasHeight: 1024,
+        canvasFillStyle: '#fff',
+        imgWidth: 512,
+        imgHeight: 512
+    }
+
+    merge(function () {
+        var text = document.createElement("p")
+        text.innerText = "合成图片成功！"
+
+        var img = document.createElement("img")
+        img.src = config.base64[0]
+
+        config.msg.append(text)
+        config.msg.append(img)
+    })
+
+    function merge(fn) {
+        var canvas = document.createElement('canvas');
+        canvas.width = config.canvasWidth;
+        canvas.height = config.canvasHeight;
+
+        var dataLength = config.data.length;
+
+        var ctx = canvas.getContext('2d');
+        ctx.rect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = config.canvasFillStyle;
+        ctx.fill();
+
+        function drawing(next) {
+            if (next < dataLength) {
+                var img = new Image;
+                img.crossOrigin = 'Anonymous'; //解决跨域
+                img.src = config.data[next];
+                img.onload = function () {
+                    ctx.drawImage(img, config.position[next][0], config.position[next][1], config.imgWidth, config.imgHeight);
+                    drawing(next + 1);//递归
+                }
+            } else {
+                //保存生成作品图片
+                config.base64.push(canvas.toDataURL("image/png", 1));
+                fn();
+            }
+        }
+
+        drawing(0);
+    }
+</script>
+</body>
+</html>
